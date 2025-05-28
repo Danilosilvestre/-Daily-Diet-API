@@ -10,7 +10,7 @@ import uuid
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "your_secret_key"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:1234@127.0.0.1:3306/flask_crud"
 
 login_manager = LoginManager()
 db.init_app(app)
@@ -122,6 +122,23 @@ def read_meals(meal_id):
         })
     return jsonify({"message": "Refeição não encontrada!"}), 404
 
+@app.route("/users/<int:user_id>", methods=["PUT"])
+@login_required
+def update_user(user_id):
+    data = request.get_json()
+    user = User.query.get(user_id)
+
+    if current_user.role != "admin" and current_user.id != user_id:
+        return jsonify({"message": "Você não tem permissão para atualizar usuários."}), 403
+    if user and data.get("password"):
+        hashed_password = bcrypt.hashpw(data["password"].encode("utf-8"), bcrypt.gensalt())
+        user.password = hashed_password.decode("utf-8")
+        db.session.commit()
+
+        return jsonify({"message": "Usuário atualizado com sucesso!"})
+    
+    return jsonify({"message": "Usuário não encontrado!"}), 404
+        
 @app.route("/meals/<string:meal_id>", methods=["PUT"])
 @login_required
 def update_meal(meal_id):

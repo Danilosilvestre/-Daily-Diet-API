@@ -1,0 +1,13 @@
+services:
+  db:
+    image: mysql:8.3
+    restart: always
+    environment:
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: '1234'
+      MYSQL_DATABASE: flask_crud
+      MYSQL_ROOT_PASSWORD: '1234'
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
